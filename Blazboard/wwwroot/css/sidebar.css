@@ -1,19 +1,19 @@
-/* Sidebar expand/collapse transition */
-.sidebar-wrapper {
+.sidebar-expanded {
+    width: 250px !important;
     transition: width 0.3s ease;
 }
 
-.sidebar-expanded {
-    width: 250px; /* Expanded width */
-}
-
 .sidebar-collapsed {
-    width: 0px; /* Collapsed width */
-    overflow: hidden; /* Hide contents when collapsed */
+    width: 0px !important;
+    transition: width 0.3s ease;
+    overflow-x: hidden;
 }
 
-    /* Optional: Add a transition to the shadow or background color when collapsed */
-    .sidebar-collapsed .p-3 {
-        opacity: 0;
-        visibility: hidden;
-    }
+.sidebar-wrapper {
+    height: 100vh;
+    flex-shrink: 0;
+    background-color: var(--bs-body-bg);
+    border-right: 1px solid var(--bs-border-color);
+    display: flex;
+    flex-direction: column;
+}

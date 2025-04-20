@@ -4,8 +4,9 @@
 
 <div class="d-flex min-vh-100">
     <!-- Sidebar -->
-    <div class="sidebar-wrapper @SidebarCssClass">
-        <div class="p-3 border-end h-100">
+    <div class="@SidebarCssClass bg-body d-flex flex-column flex-shrink-0" style="width: 250px; height: 100vh;">
+        <div class="p-3 border-end flex-grow-1 position-relative overflow-auto">
+            @* <button class="btn btn-close d-lg-none position-absolute top-0 end-0 m-2" @onclick="ToggleSidebar" aria-label="Close"></button> *@
             <h5 class="mb-4">Dashboard</h5>
             <nav class="nav flex-column">
                 <a class="nav-link" href="/">Home</a>
@@ -25,7 +26,7 @@
     </div>
 
     <!-- Main content -->
-    <div class="flex-grow-1">
+    <div class="flex-grow-1 d-flex flex-column">
         <header class="p-2 border-bottom d-flex align-items-center justify-content-between">
             <button class="btn btn-outline-primary" @onclick="ToggleSidebar">☰</button>
             <div>
@@ -36,7 +37,7 @@
                 </select>
             </div>
         </header>
-        <main class="p-4">
+        <main class="p-4 flex-grow-1 overflow-auto">
             @Body
         </main>
     </div>
