@@ -1,0 +1,19 @@
+/* Sidebar expand/collapse transition */
+.sidebar-wrapper {
+    transition: width 0.3s ease;
+}
+
+.sidebar-expanded {
+    width: 250px; /* Expanded width */
+}
+
+.sidebar-collapsed {
+    width: 0px; /* Collapsed width */
+    overflow: hidden; /* Hide contents when collapsed */
+}
+
+    /* Optional: Add a transition to the shadow or background color when collapsed */
+    .sidebar-collapsed .p-3 {
+        opacity: 0;
+        visibility: hidden;
+    }

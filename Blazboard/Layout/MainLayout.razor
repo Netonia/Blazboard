@@ -1,129 +1,127 @@
 ﻿@inherits LayoutComponentBase
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
 
-<div class="wrapper">
-    <aside id="sidebar" class="js-sidebar">
-        <div class="h-100">
-            <div class="sidebar-logo">
-                <a href="/">Blazboard</a>
-            </div>
-            <ul class="sidebar-nav">
-                @* <li class="sidebar-header">
-                    Menu
-                </li> *@
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link active">
-                        <i class="bi bi-house me-2"></i>
-                        Dashboard
+<div class="d-flex min-vh-100">
+    <!-- Sidebar -->
+    <div class="sidebar-wrapper @SidebarCssClass">
+        <div class="p-3 border-end h-100">
+            <h5 class="mb-4">Dashboard</h5>
+            <nav class="nav flex-column">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="counter">Counter</a>
+                <a class="nav-link" href="weather">Weather</a>
+                <div class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#submenu1" role="button" aria-expanded="false" aria-controls="submenu1">
+                        Submenu
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <i class="bi bi-people me-2"></i>
-                        User
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed" data-bs-target="#pages" data-bs-toggle="collapse"
-                       aria-expanded="false">
-                        <i class="bi bi-journal-text me-2"></i>
-                        Pages
-                    </a>
-                    <ul id="pages" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
-                                <i class="bi bi-circle ms-4 me-2"></i> Page 1
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
-                                <i class="bi bi-circle ms-4 me-2"></i> Page 2
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </aside>
-
-    <div class="main">
-        <nav class="navbar navbar-expand ps-0 ps-md-2 pe-3 py-0 border-bottom">
-            <button class="btn border-0" id="sidebar-toggle" type="button" onclick="document.querySelector('#sidebar').classList.toggle('collapsed');">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse navbar">
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" id="bd-theme"
-                                aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static"
-                                aria-label="Toggle theme (auto)">
-                            <i class="bi bi-sun-fill theme-icon-active" data-theme-icon-active="bi-sun-fill"></i>
-                            <span class="d-none ms-2" id="bd-theme-text">Toggle theme</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
-                            <button type="button" class="dropdown-item" data-bs-theme-value="light"
-                                    aria-pressed="false">
-                                <i class="bi bi-sun-fill opacity-50" data-theme-icon="bi-sun-fill"></i>
-                                Light
-                            </button>
-                            <button type="button" class="dropdown-item" data-bs-theme-value="dark"
-                                    aria-pressed="false">
-                                <i class="bi bi-moon-stars-fill opacity-50"
-                                   data-theme-icon="bi-moon-stars-fill"></i> Dark
-                            </button>
-                            <button type="button" class="dropdown-item" data-bs-theme-value="auto"
-                                    aria-pressed="true">
-                                <i class="bi bi-circle-half opacity-50" data-theme-icon="bi-circle-half"></i> Auto
-                            </button>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a href="#" data-bs-toggle="dropdown" data-bs-offset="10,20">
-                            <img src="https://ui-avatars.com/api/?name=agriffard&amp;background=4e73df&amp;color=ffffff&amp;size=100"
-                                 class="avatar img-fluid rounded-2 border border-secondary" alt="">
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a href="#" class="dropdown-item">Profile</a>
-                            <a href="#" class="dropdown-item">Logout</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <main class="content py-2 ps-0 ps-md-2">
-            <div class="container-fluid">
-                @Body
-            </div>
-        </main>
-
-        @* <footer class="footer">
-            <div class="container-fluid">
-                <div class="row text-muted px-3 mt-3">
-                    <div class="col text-center text-md-start">
-                        <ul class="list-inline">
-                            <li class="list-inline-item">
-                                <a href="#" class="text-muted">About Us</a>
-                            </li>
-                        </ul>
+                    <div class="collapse ps-3" id="submenu1">
+                        <a class="nav-link" href="counter">Counter</a>
+                        <a class="nav-link" href="weather">Weather</a>
                     </div>
                 </div>
-            </div>
-        </footer> *@
-    </div>
-</div>
-@* <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            </nav>
         </div>
+    </div>
 
-        <article class="content px-4">
+    <!-- Main content -->
+    <div class="flex-grow-1">
+        <header class="p-2 border-bottom d-flex align-items-center justify-content-between">
+            <button class="btn btn-outline-primary" @onclick="ToggleSidebar">☰</button>
+            <div>
+                <select class="form-select" value="@(SelectedTheme)" @onchange="OnThemeChanged">
+                    <option value="auto">Auto</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </header>
+        <main class="p-4">
             @Body
-        </article>
-    </main>
+        </main>
+    </div>
 </div>
- *@
+
+@code {
+    private bool SidebarVisible = true;
+    private string CurrentTheme = "light";  // Default theme
+    private string SelectedTheme = "auto";  // Default to Auto
+    private int windowWidth;
+
+    private bool IsLargeScreen => windowWidth >= 992;
+
+    private string SidebarCssClass =>
+        SidebarVisible ? "d-block sidebar-expanded" : "d-block sidebar-collapsed"; //|| IsLargeScreen
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            windowWidth = await JS.InvokeAsync<int>("blazorHelpers.getWindowWidth");
+
+            // Retrieve the sidebar state from localStorage or use default value
+            if (await LocalStorage.ContainKeyAsync("SidebarVisible"))
+            {
+                SidebarVisible = await LocalStorage.GetItemAsync<bool>("SidebarVisible");
+            }
+            else
+            {
+                SidebarVisible = IsLargeScreen;  // Default to expanded on large screens
+            }
+
+            // Retrieve theme from LocalStorage or determine system preference
+            CurrentTheme = await LocalStorage.GetItemAsync<string>("AppTheme");
+
+            if (string.IsNullOrEmpty(CurrentTheme))
+            {
+                var systemTheme = await JS.InvokeAsync<string>("blazorHelpers.getSystemTheme");
+                CurrentTheme = systemTheme ?? "light"; // Default to light if no system preference is found
+            }
+
+            SelectedTheme = CurrentTheme;
+
+            await SetThemeAsync(CurrentTheme);
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleSidebar()
+    {
+        SidebarVisible = !SidebarVisible;
+        await LocalStorage.SetItemAsync("SidebarVisible", SidebarVisible);  // Save state to localStorage
+
+        // Trigger UI update immediately
+        StateHasChanged();
+
+        if (SidebarVisible)
+        {
+            await JS.InvokeVoidAsync("blazorHelpers.showSidebar");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("blazorHelpers.hideSidebar");
+        }
+    }
+
+    private async Task OnThemeChanged(ChangeEventArgs e)
+    {
+        SelectedTheme = e.Value.ToString(); // Set the new theme based on the change event
+
+        if (SelectedTheme == "auto")
+        {
+            var systemTheme = await JS.InvokeAsync<string>("blazorHelpers.getSystemTheme");
+            await SetThemeAsync(systemTheme ?? "light");
+        }
+        else
+        {
+            await SetThemeAsync(SelectedTheme);
+        }
+
+        await LocalStorage.SetItemAsync("AppTheme", SelectedTheme);
+    }
+
+    private async Task SetThemeAsync(string theme)
+    {
+        await JS.InvokeVoidAsync("blazorTheme.setBootstrapTheme", theme);
+    }
+}
