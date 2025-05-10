@@ -1,41 +1,29 @@
 ﻿@inherits LayoutComponentBase
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
-@inject IJSRuntime JS
+@inject NavMenuStateService NavState
 
 <div class="d-flex min-vh-100">
-    <!-- Sidebar -->
     <div class="@SidebarCssClass bg-body d-flex flex-column flex-shrink-0" style="width: 250px; height: 100vh;">
         <div class="p-3 border-end flex-grow-1 position-relative overflow-auto">
-            @* <button class="btn btn-close d-lg-none position-absolute top-0 end-0 m-2" @onclick="ToggleSidebar" aria-label="Close"></button> *@
-            <h5 class="mb-4">Dashboard</h5>
-            <nav class="nav flex-column">
-                <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="counter">Counter</a>
-                <a class="nav-link" href="weather">Weather</a>
-                <div class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#submenu1" role="button" aria-expanded="false" aria-controls="submenu1">
-                        Submenu
-                    </a>
-                    <div class="collapse ps-3" id="submenu1">
-                        <a class="nav-link" href="counter">Counter</a>
-                        <a class="nav-link" href="weather">Weather</a>
-                    </div>
-                </div>
-            </nav>
+            <h5 class="mb-4"><a href="/" class="text-decoration-none">Dashboard</a></h5>
+            <NavMenu />
         </div>
     </div>
 
-    <!-- Main content -->
     <div class="flex-grow-1 d-flex flex-column">
         <header class="p-2 border-bottom d-flex align-items-center justify-content-between">
-            <button class="btn btn-outline-primary" @onclick="ToggleSidebar">☰</button>
-            <div>
-                <select class="form-select" value="@(SelectedTheme)" @onchange="OnThemeChanged">
-                    <option value="auto">Auto</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </div>
+            <SidebarButton />
+
+            <ul class="navbar-nav flex-row flex-wrap ms-md-auto">
+                @* <li class="nav-item">
+                    <GitHubSourceLink />
+                </li> *@
+                <li class="nav-item dropdown">
+                    <CultureSwitcher />
+                </li>
+                <li class="nav-item dropdown">
+                    <ThemeSwitcher />
+                </li>
+            </ul>
         </header>
         <main class="p-4 flex-grow-1 overflow-auto">
             @Body
@@ -44,85 +32,16 @@
 </div>
 
 @code {
-    private bool SidebarVisible = true;
-    private string CurrentTheme = "light";  // Default theme
-    private string SelectedTheme = "auto";  // Default to Auto
-    private int windowWidth;
+    private string? SidebarCssClass => NavState.IsCollapsed ? "d-block sidebar-expanded" : "d-block sidebar-collapsed";
 
-    private bool IsLargeScreen => windowWidth >= 992;
-
-    private string SidebarCssClass =>
-        SidebarVisible ? "d-block sidebar-expanded" : "d-block sidebar-collapsed"; //|| IsLargeScreen
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            windowWidth = await JS.InvokeAsync<int>("blazorHelpers.getWindowWidth");
-
-            // Retrieve the sidebar state from localStorage or use default value
-            if (await LocalStorage.ContainKeyAsync("SidebarVisible"))
-            {
-                SidebarVisible = await LocalStorage.GetItemAsync<bool>("SidebarVisible");
-            }
-            else
-            {
-                SidebarVisible = IsLargeScreen;  // Default to expanded on large screens
-            }
-
-            // Retrieve theme from LocalStorage or determine system preference
-            CurrentTheme = await LocalStorage.GetItemAsync<string>("AppTheme");
-
-            if (string.IsNullOrEmpty(CurrentTheme))
-            {
-                var systemTheme = await JS.InvokeAsync<string>("blazorHelpers.getSystemTheme");
-                CurrentTheme = systemTheme ?? "light"; // Default to light if no system preference is found
-            }
-
-            SelectedTheme = CurrentTheme;
-
-            await SetThemeAsync(CurrentTheme);
-            StateHasChanged();
-        }
+        await NavState.InitializeAsync();
+        NavState.OnChange += StateHasChanged;
     }
 
-    private async Task ToggleSidebar()
+    public void Dispose()
     {
-        SidebarVisible = !SidebarVisible;
-        await LocalStorage.SetItemAsync("SidebarVisible", SidebarVisible);  // Save state to localStorage
-
-        // Trigger UI update immediately
-        StateHasChanged();
-
-        if (SidebarVisible)
-        {
-            await JS.InvokeVoidAsync("blazorHelpers.showSidebar");
-        }
-        else
-        {
-            await JS.InvokeVoidAsync("blazorHelpers.hideSidebar");
-        }
-    }
-
-    private async Task OnThemeChanged(ChangeEventArgs e)
-    {
-        SelectedTheme = e.Value.ToString(); // Set the new theme based on the change event
-
-        if (SelectedTheme == "auto")
-        {
-            var systemTheme = await JS.InvokeAsync<string>("blazorHelpers.getSystemTheme");
-            await SetThemeAsync(systemTheme ?? "light");
-        }
-        else
-        {
-            await SetThemeAsync(SelectedTheme);
-        }
-
-        await LocalStorage.SetItemAsync("AppTheme", SelectedTheme);
-    }
-
-    private async Task SetThemeAsync(string theme)
-    {
-        await JS.InvokeVoidAsync("blazorTheme.setBootstrapTheme", theme);
+        NavState.OnChange -= StateHasChanged;
     }
 }
